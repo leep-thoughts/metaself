@@ -172,17 +172,22 @@ generated (`p` → `theta_a - theta_b` via the existing `theta_gap_from_winrate`
 `measures/panickssery.py` and `measures/equal_opportunity.py` on each generated
 dataset. No changes were made to either measure module.
 
-**Grid**: `P_VALUES = [0.5, 0.55, ..., 0.95, 0.98]` (11 values),
-`ACCURACIES = [0.5, 0.55, ..., 0.95, 0.98]` (11 values),
+**Grid parameters now live in `sweep_config.py`** (pulled out of `meta_eval_sweep.py`
+so the knobs can be edited without touching the sweep logic):
+`P_VALUES = ACCURACIES = [0.02, 0.05, 0.1, 0.2, ..., 0.9, 0.95, 0.98]` (13 values each),
 `SELF_LEANS = [-2.0, -1.5, -1.0, -0.5, -0.2, -0.1, 0.0, 0.1, 0.2, 0.5, 1.0, 1.5, 2.0]`
-(13 values) — 1573 grid points, `N_ITEMS=2000`, `N_REPEATS=10` independent datasets per
-point. Widened from an initial 6x6x7=252-point grid once the run cost was confirmed
-negligible (pure stdlib, well under the job's time budget) — the wider range pushes
-`p` and `accuracy` close enough to their extremes that the group-size effect (below)
-shows up clearly rather than needing to be taken on faith. Seeding: one `MASTER_SEED`
+(13 values) — 2197 grid points, `N_ITEMS=2000`, `N_REPEATS=10` independent datasets per
+point. `p` and `accuracy` stop just short of the true 0/1 endpoints on purpose: both
+get converted to log-odds via `logit`, and `logit(0)`/`logit(1)` are mathematically
+undefined (Python raises `ZeroDivisionError` on the underlying `1.0/0.0` before even
+reaching `log`) — `0.02`/`0.98` is as close as the pipeline can go without crashing.
+Widened progressively from an initial 6x6x7=252-point grid once the run cost was
+confirmed negligible (pure stdlib, well under the job's time budget) — the wider,
+now-symmetric range shows the group-size effect at *both* tails (small `|D_A|` near
+`p=0.02`, small `|D_B|` near `p=0.98`), not just one. Seeding: one `MASTER_SEED`
 feeds a single RNG that spawns a fresh sub-seed per draw (`getrandbits(63)`, same
 pattern as numpy's `SeedSequence.spawn()`) — reproducible from one number, collision
-risk across the ~30k spawned seeds is still astronomically small.
+risk across the ~44k spawned seeds is still astronomically small.
 
 **Sensitivity summary**: for each knob, hold the other two fixed and measure how much
 the *mean* estimate (across repeats) moves as that one knob sweeps — `self_lean` is the
@@ -218,3 +223,54 @@ tells you where to be suspicious; the second tells you whether you were right to
 point's estimate, and a variance-vs-group-size table that fixes `accuracy`/`self_lean`
 at one representative setting and sweeps `p`, showing each measure's mean and std
 across repeats next to the group sizes at that point.
+
+## 7. HSPP — third measure added to the roster
+
+`measures/hspp.py` replicates **harmful self-preference propensity (HSPP)**, Eq. 5 of
+Chen et al. 2025, "Do LLM Evaluators Prefer Themselves for a Reason?"
+(arXiv:2504.03846):
+
+```
+HSPP = P(judge votes for itself | the OTHER response is actually correct)
+     = (# items where oracle says B is right AND judge still votes for A)
+       / (# items where oracle says B is right)
+```
+
+The paper restricts to a "differential" subset where exactly one response is correct;
+our oracle always picks exactly one winner per item, so every item already satisfies
+that condition — no separate filter needed. Same wiring as the other two measures: a
+real `estimate_bias(oracle_truth, judge_decisions)` call on freshly generated data, no
+closed-form shortcut.
+
+**Why it was added — this is the "no baseline" property.** A conversation about
+`equal_opportunity` raised a concrete question: isolate the items where the *other*
+model is actually better — even with zero true self-preference bias, won't the judge
+still pick itself sometimes, purely from inaccuracy? Yes — that rate is exactly
+`1 - TNR`, and it's real: nonzero whenever `accuracy < 1`. `equal_opportunity` hides
+that floor because its `TPR - TNR` contrast nets it against the mirror-image mistake on
+the *other* oracle-split (`1 - TPR`, wrongly voting against yourself when you're
+actually right) — same accuracy parameter, same magnitude, opposite sign, cancels
+exactly at `self_lean = 0`. **HSPP is that raw floor, reported on its own, with nothing
+subtracted off.** It's a one-sided rate, not a contrast — which is the published
+critique of measures like this: there's no built-in baseline of 0 under pure
+inaccuracy, so a non-biased-but-imperfect judge still reports a nonzero HSPP.
+
+Derivation (`L = logit(accuracy)`): `E[HSPP] = sigmoid(self_lean - L) = 1 - TNR`. At
+`self_lean = 0`, `E[HSPP] = 1 - accuracy` — independent of `p`, but strongly and
+*directly* confounded by `accuracy`, by construction. **Confirmed in the Slurm run**:
+sensitivity-to-accuracy for HSPP is `0.9349` (near the full possible range), versus
+`0.0236` for sensitivity-to-`p` — the sharpest accuracy confound of the three measures,
+exactly the "no baseline" property stated above, not a bug in the replication.
+
+Wired into `meta_eval_sweep.py` (`run_one`, the results dict, the sensitivity summary,
+and the variance-vs-group-size table) and into the dashboard (third categorical slot,
+aqua — `--series-hspp` — added to every chart, plus a third heatmap panel). The
+heatmap panel is the clearest illustration: `panickssery` and `equal_opportunity` read
+flat gray at `self_lean=0` (mostly) while `hspp`'s panel visibly tracks the accuracy
+axis even with zero true bias, by design.
+
+**Not implemented from the same paper**: SPR (self-preference ratio, Eq. 2) — it's
+`mean(judge_decisions)` exactly, i.e. `panickssery.estimate_bias(...) + 0.5`, so no new
+code was needed. LSPR (legitimate self-preference ratio, Eq. 4) — precision of
+self-votes (`P(oracle=A | vote=A)`), a different conditioning than anything currently
+implemented — left out since it wasn't asked for; flag if useful later.
