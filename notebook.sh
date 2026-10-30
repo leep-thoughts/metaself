@@ -1,0 +1,1 @@
+salloc --account=aip-lilimou --time=8:00:00 --mem=4G --cpus-per-task=2

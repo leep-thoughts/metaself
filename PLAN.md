@@ -189,6 +189,15 @@ feeds a single RNG that spawns a fresh sub-seed per draw (`getrandbits(63)`, sam
 pattern as numpy's `SeedSequence.spawn()`) — reproducible from one number, collision
 risk across the ~44k spawned seeds is still astronomically small.
 
+**Fine 1-D slices for the dashboard charts**: the line charts only ever plot one knob
+at a time, so `meta_eval_sweep.py` also runs three fine slices (`FINE_*` in
+`sweep_config.py`, same step as the dashboard sliders): `self_lean` from −2 to 2 in
+0.05 steps (81 points), `p` and `accuracy` from 0.02 to 0.98 in 0.01 steps (97 each).
+The other two knobs are held at `REP_P`/`REP_ACCURACY`/`REP_SELF_LEAN`, with 10 repeats
+per point as on the grid. They're stored under `"slices"` in `sweep_results.json`.
+Refining the full 3-D grid to that step instead would be ~760k points, about 40
+CPU-hours and a ~200 MB results file, for charts that never use the extra dimensions.
+
 **Sensitivity summary**: for each knob, hold the other two fixed and measure how much
 the *mean* estimate (across repeats) moves as that one knob sweeps — `self_lean` is the
 wanted signal; `p` and `accuracy` are confounds a trustworthy measure should score near

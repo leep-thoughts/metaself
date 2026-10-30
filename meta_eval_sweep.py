@@ -19,7 +19,7 @@ import random
 
 from synth.oracle import draw_oracle_truth, theta_gap_from_winrate
 from synth.judge import simulate_judge_votes
-from measures import panickssery, equal_opportunity, hspp
+from measures import panickssery, equal_opportunity, hspp, roytburg
 from sweep_config import (
     P_VALUES,
     ACCURACIES,
@@ -27,8 +27,12 @@ from sweep_config import (
     N_ITEMS,
     N_REPEATS,
     MASTER_SEED,
+    REP_P,
     REP_ACCURACY,
     REP_SELF_LEAN,
+    FINE_P_VALUES,
+    FINE_ACCURACIES,
+    FINE_SELF_LEANS,
 )
 
 # Grid/run knobs now live in sweep_config.py -- edit that file to change the swept
@@ -62,44 +66,72 @@ def run_one(p: float, accuracy: float, self_lean: float):
     theta_gap = theta_gap_from_winrate(p)
     oracle_truth = draw_oracle_truth(N_ITEMS, theta_gap, 0.0, seed=fresh_seed())
     judge_decisions = simulate_judge_votes(oracle_truth, accuracy, self_lean, seed=fresh_seed())
+    # Roytburg's proxy: on the same items the same judge rates another model's answer
+    # with the same correctness as A's (outcome-matched), with no self-lean toward it.
+    proxy_decisions = simulate_judge_votes(oracle_truth, accuracy, 0.0, seed=fresh_seed())
 
     pan = panickssery.estimate_bias(judge_decisions)
     eo = equal_opportunity.estimate_bias(oracle_truth, judge_decisions)
     hs = hspp.estimate_bias(oracle_truth, judge_decisions)
+    rb = roytburg.estimate_bias(oracle_truth, judge_decisions, proxy_decisions)
 
     n_a = sum(oracle_truth)
     n_b = len(oracle_truth) - n_a
-    return pan, eo, hs, n_a, n_b
+    return pan, eo, hs, rb, n_a, n_b
 
 
 # ---------------------------------------------------------------------------
 # Run the full grid: N_REPEATS independent datasets per grid point.
 # ---------------------------------------------------------------------------
+def summarize_point(p: float, accuracy: float, self_lean: float):
+    """N_REPEATS independent datasets at one setting, summarized per measure."""
+    pan_vals, eo_vals, hs_vals, rb_vals = [], [], [], []
+    n_a, n_b = None, None
+    for _ in range(N_REPEATS):
+        pan, eo, hs, rb, n_a, n_b = run_one(p, accuracy, self_lean)
+        pan_vals.append(pan)
+        eo_vals.append(eo)
+        hs_vals.append(hs)
+        rb_vals.append(rb)
+    return {
+        "pan_mean": mean(pan_vals),
+        "pan_std": stdev(pan_vals),
+        "eo_mean": mean(eo_vals),
+        "eo_std": stdev(eo_vals),
+        "hspp_mean": mean(hs_vals),
+        "hspp_std": stdev(hs_vals),
+        "rb_mean": mean(rb_vals),
+        "rb_std": stdev(rb_vals),
+        # group sizes are random (binomial around N*p / N*(1-p)) but stable
+        # enough across repeats that the last repeat's counts are a fine
+        # representative sample -- not worth re-reporting all N_REPEATS of them.
+        "n_a": n_a,
+        "n_b": n_b,
+    }
+
+
 results = {}  # (p, accuracy, self_lean) -> summary dict
 
 for p in P_VALUES:
     for accuracy in ACCURACIES:
         for self_lean in SELF_LEANS:
-            pan_vals, eo_vals, hs_vals = [], [], []
-            n_a, n_b = None, None
-            for _ in range(N_REPEATS):
-                pan, eo, hs, n_a, n_b = run_one(p, accuracy, self_lean)
-                pan_vals.append(pan)
-                eo_vals.append(eo)
-                hs_vals.append(hs)
-            results[(p, accuracy, self_lean)] = {
-                "pan_mean": mean(pan_vals),
-                "pan_std": stdev(pan_vals),
-                "eo_mean": mean(eo_vals),
-                "eo_std": stdev(eo_vals),
-                "hspp_mean": mean(hs_vals),
-                "hspp_std": stdev(hs_vals),
-                # group sizes are random (binomial around N*p / N*(1-p)) but stable
-                # enough across repeats that the last repeat's counts are a fine
-                # representative sample -- not worth re-reporting all N_REPEATS of them.
-                "n_a": n_a,
-                "n_b": n_b,
-            }
+            results[(p, accuracy, self_lean)] = summarize_point(p, accuracy, self_lean)
+
+# Fine 1-D slices for the dashboard line charts (see sweep_config.py).
+slices = {
+    "self_lean": [
+        {"p": REP_P, "accuracy": REP_ACCURACY, "self_lean": sl, **summarize_point(REP_P, REP_ACCURACY, sl)}
+        for sl in FINE_SELF_LEANS
+    ],
+    "p": [
+        {"p": p, "accuracy": REP_ACCURACY, "self_lean": REP_SELF_LEAN, **summarize_point(p, REP_ACCURACY, REP_SELF_LEAN)}
+        for p in FINE_P_VALUES
+    ],
+    "accuracy": [
+        {"p": REP_P, "accuracy": a, "self_lean": REP_SELF_LEAN, **summarize_point(REP_P, a, REP_SELF_LEAN)}
+        for a in FINE_ACCURACIES
+    ],
+}
 
 # ---------------------------------------------------------------------------
 # Sensitivity summary: for each knob, hold the other two fixed and measure how much
@@ -140,18 +172,18 @@ print("=" * 72)
 print("SENSITIVITY SUMMARY -- average range of the MEAN estimate per knob")
 print("(self_lean = wanted signal; p and accuracy = confounds, want these near 0)")
 print("=" * 72)
-print(f"{'knob':<24} {'panickssery':>15} {'equal_opportunity':>20} {'hspp':>10}")
+print(f"{'knob':<24} {'panickssery':>15} {'equal_opportunity':>20} {'hspp':>10} {'roytburg':>10}")
 print(
     f"{'self_lean (wanted)':<24} {sensitivity_to_self_lean('pan_mean'):>15.4f} "
-    f"{sensitivity_to_self_lean('eo_mean'):>20.4f} {sensitivity_to_self_lean('hspp_mean'):>10.4f}"
+    f"{sensitivity_to_self_lean('eo_mean'):>20.4f} {sensitivity_to_self_lean('hspp_mean'):>10.4f} {sensitivity_to_self_lean('rb_mean'):>10.4f}"
 )
 print(
     f"{'p / quality (confound)':<24} {sensitivity_to_p('pan_mean'):>15.4f} "
-    f"{sensitivity_to_p('eo_mean'):>20.4f} {sensitivity_to_p('hspp_mean'):>10.4f}"
+    f"{sensitivity_to_p('eo_mean'):>20.4f} {sensitivity_to_p('hspp_mean'):>10.4f} {sensitivity_to_p('rb_mean'):>10.4f}"
 )
 print(
     f"{'accuracy (confound)':<24} {sensitivity_to_accuracy('pan_mean'):>15.4f} "
-    f"{sensitivity_to_accuracy('eo_mean'):>20.4f} {sensitivity_to_accuracy('hspp_mean'):>10.4f}"
+    f"{sensitivity_to_accuracy('eo_mean'):>20.4f} {sensitivity_to_accuracy('hspp_mean'):>10.4f} {sensitivity_to_accuracy('rb_mean'):>10.4f}"
 )
 print()
 
@@ -165,13 +197,13 @@ print(f"VARIANCE vs. GROUP SIZE (accuracy={REP_ACCURACY}, self_lean={REP_SELF_LE
 print("=" * 72)
 print(
     f"{'p':>6} {'|D_A|':>8} {'|D_B|':>8} {'eo_mean':>10} {'eo_std':>10} "
-    f"{'pan_mean':>10} {'pan_std':>10} {'hspp_mean':>10} {'hspp_std':>10}"
+    f"{'pan_mean':>10} {'pan_std':>10} {'hspp_mean':>10} {'hspp_std':>10} {'rb_mean':>10} {'rb_std':>10}"
 )
 for p in P_VALUES:
     r = results[(p, REP_ACCURACY, REP_SELF_LEAN)]
     print(
         f"{p:>6.2f} {r['n_a']:>8} {r['n_b']:>8} {r['eo_mean']:>10.4f} {r['eo_std']:>10.4f} "
-        f"{r['pan_mean']:>10.4f} {r['pan_std']:>10.4f} {r['hspp_mean']:>10.4f} {r['hspp_std']:>10.4f}"
+        f"{r['pan_mean']:>10.4f} {r['pan_std']:>10.4f} {r['hspp_mean']:>10.4f} {r['hspp_std']:>10.4f} {r['rb_mean']:>10.4f} {r['rb_std']:>10.4f}"
     )
 
 # ---------------------------------------------------------------------------
@@ -196,10 +228,15 @@ if "--dump-json" in sys.argv:
                     "SELF_LEANS": SELF_LEANS,
                     "N_ITEMS": N_ITEMS,
                     "N_REPEATS": N_REPEATS,
+                    "REP_P": REP_P,
                     "REP_ACCURACY": REP_ACCURACY,
                     "REP_SELF_LEAN": REP_SELF_LEAN,
+                    "FINE_P_VALUES": FINE_P_VALUES,
+                    "FINE_ACCURACIES": FINE_ACCURACIES,
+                    "FINE_SELF_LEANS": FINE_SELF_LEANS,
                 },
                 "rows": rows,
+                "slices": slices,
             },
             f,
         )

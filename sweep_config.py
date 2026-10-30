@@ -20,5 +20,13 @@ MASTER_SEED = 12345
 
 # Representative fixed values used by the single-knob charts (response-to-self_lean,
 # quality-sweep, accuracy-sweep) -- must each be a member of the lists above.
+REP_P = 0.8
 REP_ACCURACY = 0.8
 REP_SELF_LEAN = 0.2
+
+# Fine 1-D slices for the dashboard's line charts: one knob swept at the same step
+# size as the dashboard sliders, the other two held at the REP_* anchors. Refining
+# the full 3-D grid to this step instead would be ~760k points.
+FINE_P_VALUES = [round(0.02 + 0.01 * i, 2) for i in range(97)]
+FINE_ACCURACIES = [round(0.02 + 0.01 * i, 2) for i in range(97)]
+FINE_SELF_LEANS = [round(-2.0 + 0.05 * i, 2) for i in range(81)]
