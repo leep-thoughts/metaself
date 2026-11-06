@@ -33,6 +33,7 @@ REPO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 REPO_URL = "https://github.com/wlchen0206/llm-sp.git"
 
 TASKS = ["math500", "mmlu", "mbpp-plus"]
+VERDICTS = ("A", "T", "B")
 OPPONENTS = ["gemma-2-2b", "gpt-3.5-turbo", "gpt-4o", "llama-3.2-1b",
              "mistral-7b-v0.3", "mistral-small", "phi-3.5-mini"]
 SETTING_GLOB = {
@@ -62,7 +63,7 @@ def load(setting: str = "direct", tasks=TASKS, text: bool = False) -> pd.DataFra
 
     Columns: setting, task, family, judge, opponent, problem_id, own_correct,
     other_correct, and for each order g in {1, 2} the judge's p_own_g, p_tie_g,
-    p_other_g (g=1: own answer shown first; g=2: own answer shown second).
+    p_other_g (g=1: own answer shown first; g=2: own answer shown second), verdict_ok.
     text=True also keeps problem, own_answer, other_answer, output_1, output_2.
     """
     rows = []
@@ -75,6 +76,7 @@ def load(setting: str = "direct", tasks=TASKS, text: bool = False) -> pd.DataFra
                     r = json.loads(line)
                     a1, t1, b1 = r["game_1_spb_score"]  # own = A
                     a2, t2, b2 = r["game_2_spb_score"]  # own = B
+                    o1, o2 = r.get("game_1_output"), r.get("game_2_output")
                     row = {
                         "setting": setting, "task": task, "family": family,
                         "judge": judge, "opponent": opponent,
@@ -83,6 +85,10 @@ def load(setting: str = "direct", tasks=TASKS, text: bool = False) -> pd.DataFra
                         "other_correct": r["assistent_2_is_correct"],
                         "p_own_1": a1, "p_tie_1": t1, "p_other_1": b1,
                         "p_own_2": b2, "p_tie_2": t2, "p_other_2": a2,
+                        # real A/T/B verdict in both orders; None where unknown (MATH500
+                        # stores no outputs) or not applicable (cot settings reason first)
+                        "verdict_ok": None if setting != "direct" or o1 is None or o2 is None
+                                      else o1.strip() in VERDICTS and o2.strip() in VERDICTS,
                     }
                     if text:
                         row.update(problem=r["problem"],

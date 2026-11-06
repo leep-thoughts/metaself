@@ -14,8 +14,15 @@ Per (judge J, reference R, example):
                       answer has the same correctness as J's on that example
 Each record gives prob_response1 / prob_response2 (tie is the remaining mass).
 
-Only a subset of Chen's usable pairs was run (~14k self-judgments; ~2.9k where J's own
-answer is wrong).
+Only a subset of Chen's pairs was run: 200 sampled problems per (judge, reference, task),
+keeping the usable ones (~14k self-judgments; ~2.9k where J's own answer is wrong).
+
+Data quality: verdicts are capped at one token. When that token isn't A/B/T (e.g. "The"),
+the release still reports probabilities, renormalized from whatever A/B/T tokens made the
+top 20 -- which can give P = 1.0 or a flat 0.33 fallback. Gemma-2-27B starts with a
+non-verdict on ~90% of its judgments and, unlike in Chen's run, has no usable items left.
+verdict_only=True (default) keeps only judgments with a real verdict in both orders and
+drops that judge; verdict_only=False reproduces the paper's Table 1.
 """
 
 import glob
@@ -31,6 +38,7 @@ REPO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 REPO_URL = "https://github.com/djroytburg/sanity_checks_for_self_preference.git"
 CACHE_GLOB = "judge_swap_null_verif_smoke2/{task}/cache/*/*"
 TASKS = ["math500", "mmlu", "mbpp-plus"]
+EXCLUDED_JUDGES = {"gemma-2-27b"}  # applied when verdict_only=True
 
 
 def download():
@@ -47,12 +55,16 @@ def _p_candidate(r) -> float:
     return r["prob_response1"] if r["response1_key"] in ("judge", "proxy") else r["prob_response2"]
 
 
+def _is_verdict(r) -> bool:
+    return r["generated_text"].strip() in ("A", "B", "T")
+
+
 def _read(path):
     with open(path) as f:
         return [json.loads(line) for line in f]
 
 
-def load(tasks=TASKS) -> pd.DataFrame:
+def load(tasks=TASKS, verdict_only: bool = True) -> pd.DataFrame:
     """
     One row per (task, judge, reference, example) that has a self-judgment.
 
@@ -65,26 +77,35 @@ def load(tasks=TASKS) -> pd.DataFrame:
     for task in tasks:
         for d in sorted(glob.glob(os.path.join(REPO_DIR, CACHE_GLOB.format(task=task)))):
             judge, opponent = d.split(os.sep)[-2:]
+            if verdict_only and judge in EXCLUDED_JUDGES:
+                continue
             self_p = defaultdict(dict)
+            self_ok = defaultdict(lambda: True)
             category = {}
             for g in (1, 2):
                 for r in _read(os.path.join(d, f"J_vs_R_game{g}.jsonl")):
                     self_p[r["example_id"]][g] = _p_candidate(r)
+                    self_ok[r["example_id"]] &= _is_verdict(r)
                     category[r["example_id"]] = r["category"]
-            proxy_p, proxies = defaultdict(list), defaultdict(set)
+            proxy_games = defaultdict(lambda: defaultdict(list))
+            proxy_ok = defaultdict(lambda: True)
             for g in (1, 2):
                 for r in _read(os.path.join(d, f"K_vs_R_game{g}.jsonl")):
-                    proxy_p[r["example_id"]].append(_p_candidate(r))
-                    proxies[r["example_id"]].add(r["proxy"])
+                    proxy_games[r["example_id"]][r["proxy"]].append(_p_candidate(r))
+                    proxy_ok[(r["example_id"], r["proxy"])] &= _is_verdict(r)
             for ex, p in self_p.items():
-                pp = proxy_p.get(ex, [])
+                if verdict_only and not (self_ok[ex] and len(p) == 2):
+                    continue
+                proxies = {k: v for k, v in proxy_games.get(ex, {}).items()
+                           if not verdict_only or (proxy_ok[(ex, k)] and len(v) == 2)}
+                pp = [x for v in proxies.values() for x in v]
                 rows.append({
                     "task": task, "judge": judge, "opponent": opponent, "problem_idx": ex,
                     "own_correct": category[ex] == "lsp",
                     "s_self_1": p.get(1), "s_self_2": p.get(2),
                     "s_self": sum(p.values()) / len(p),
                     "s_proxy": sum(pp) / len(pp) if pp else float("nan"),
-                    "n_proxies": len(proxies.get(ex, ())),
+                    "n_proxies": len(proxies),
                 })
     return pd.DataFrame(rows)
 
@@ -98,7 +119,7 @@ def family(model: str) -> str:
     raise ValueError(model)
 
 
-def load_proxy_pairs(tasks=TASKS, eps: float = 1e-6) -> pd.DataFrame:
+def load_proxy_pairs(tasks=TASKS, eps: float = 1e-6, verdict_only: bool = True) -> pd.DataFrame:
     """
     The K_vs_R judgments as pairs in their own right: judge J rates proxy K's answer (A)
     against reference R's answer (B). J wrote neither, so its true self_lean toward A is
@@ -112,6 +133,8 @@ def load_proxy_pairs(tasks=TASKS, eps: float = 1e-6) -> pd.DataFrame:
     for task in tasks:
         for d in sorted(glob.glob(os.path.join(REPO_DIR, CACHE_GLOB.format(task=task)))):
             judge, opponent = d.split(os.sep)[-2:]
+            if verdict_only and judge in EXCLUDED_JUDGES:
+                continue
             by_key = {}
             for g in (1, 2):
                 for r in _read(os.path.join(d, f"K_vs_R_game{g}.jsonl")):
@@ -121,8 +144,11 @@ def load_proxy_pairs(tasks=TASKS, eps: float = 1e-6) -> pd.DataFrame:
                         "task": task, "judge": judge, "opponent": opponent, "proxy": r["proxy"],
                         "problem_idx": r["example_id"], "a_correct": r["category"] == "lsp"})
                     row[f"l_{g}"] = math.log(p_a / p_b)
+                    row[f"ok_{g}"] = _is_verdict(r)
             rows.extend(by_key.values())
     df = pd.DataFrame(rows).dropna(subset=["l_1", "l_2"])
+    if verdict_only:
+        df = df[(df.ok_1 == True) & (df.ok_2 == True)]
     df["l"] = (df.l_1 + df.l_2) / 2
     fj = df.judge.map(family)
     df["cross_family"] = (fj != df.proxy.map(family)) & (fj != df.opponent.map(family))
@@ -133,7 +159,7 @@ if __name__ == "__main__":
     # Reproduces the verifiable-task block of Roytburg et al. Table 1 (ILSP_orig, ILSP_upd, N).
     from measures import roytburg
 
-    df = load()
+    df = load(verdict_only=False)
     for (task, judge), g in df.groupby(["task", "judge"]):
         ilsp = g[~g.own_correct]
         matched = ilsp.dropna(subset=["s_proxy"])

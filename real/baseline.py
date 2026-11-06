@@ -120,6 +120,8 @@ def run() -> pd.DataFrame:
     rows = []
     for setting in chen.SETTING_GLOB:
         u = chen.usable(chen.load(setting))
+        # Drop judgments whose first token wasn't a verdict, where we can tell (see chen.load).
+        u = u[u.verdict_ok != False].copy()
         for rule in ("A", "C"):
             u["vote"] = votes(u, rule)
             kept = u.dropna(subset=["vote"])
