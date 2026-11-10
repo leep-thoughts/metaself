@@ -1,0 +1,4 @@
+{"id": "math-1", "question": "What is 17 * 23?", "answer_a": "17 * 23 = 17 * 20 + 17 * 3 = 340 + 51 = 391. The answer is 391.", "answer_b": "17 * 23 = 17 * 20 + 17 * 3 = 340 + 41 = 381. The answer is 381.", "a_correct": true}
+{"id": "math-2", "question": "Solve for x: 2x + 6 = 14.", "answer_a": "2x = 14 + 6 = 20, so x = 10.", "answer_b": "2x = 14 - 6 = 8, so x = 4.", "a_correct": false}
+{"id": "mmlu-1", "question": "Which planet is closest to the Sun? (A) Venus (B) Mercury (C) Mars (D) Earth", "answer_a": "The closest planet to the Sun is Mercury. Answer: (B)", "answer_b": "The closest planet to the Sun is Venus. Answer: (A)", "a_correct": true}
+{"id": "code-1", "question": "Write a Python function is_even(n) that returns True if n is even.\nassert is_even(4) == True", "answer_a": "def is_even(n):\n    return n % 2 == 1", "answer_b": "def is_even(n):\n    return n % 2 == 0", "a_correct": false}

@@ -127,7 +127,8 @@ def load_proxy_pairs(tasks=TASKS, eps: float = 1e-6, verdict_only: bool = True) 
 
     One row per (task, judge, opponent, proxy, problem). Columns: a_correct (K's answer is
     the correct one), l_1, l_2 (J's log-odds for A over B in each order, tie mass
-    dropped; game 1 shows A first), l (their mean), cross_family.
+    dropped; game 1 shows A first), l (their mean), tie_1, tie_2 (J's tie probability in
+    each order), cross_family.
     """
     rows = []
     for task in tasks:
@@ -144,6 +145,7 @@ def load_proxy_pairs(tasks=TASKS, eps: float = 1e-6, verdict_only: bool = True) 
                         "task": task, "judge": judge, "opponent": opponent, "proxy": r["proxy"],
                         "problem_idx": r["example_id"], "a_correct": r["category"] == "lsp"})
                     row[f"l_{g}"] = math.log(p_a / p_b)
+                    row[f"tie_{g}"] = max(0.0, 1 - r["prob_response1"] - r["prob_response2"])
                     row[f"ok_{g}"] = _is_verdict(r)
             rows.extend(by_key.values())
     df = pd.DataFrame(rows).dropna(subset=["l_1", "l_2"])
