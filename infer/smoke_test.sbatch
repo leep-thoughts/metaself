@@ -1,17 +1,15 @@
 #!/bin/bash
 # GPU smoke test for the vLLM stack -- run once GPUs are available:
-#   cd /scratch/haobin4/metaself && sbatch infer/smoke_test.sbatch [model]
+#   source infer/env.sh && sbatch $(gpu_flags 1) infer/smoke_test.sbatch [model]
 # Default model is already cached in $HF_HOME, so the job needs no download.
 #SBATCH --job-name=vllm-smoke
-#SBATCH --account=aip-lilimou
-#SBATCH --gres=gpu:l40s:1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=00:45:00
-#SBATCH --output=/scratch/haobin4/metaself/logs/%x_%j.out
+#SBATCH --output=logs/%x_%j.out
 
 set -euo pipefail
-source /scratch/haobin4/metaself/infer/env.sh
+source "${SLURM_SUBMIT_DIR:-.}/infer/env.sh"   # submit from the repo root
 export HF_HUB_OFFLINE=1
 nvidia-smi -L
 python -c "import vllm, torch; print('vllm', vllm.__version__, 'torch', torch.__version__, 'cuda ok', torch.cuda.is_available())"

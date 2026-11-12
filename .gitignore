@@ -2,3 +2,4 @@ data/
 __pycache__/
 infer/data/
 logs/
+infer/clusters/local.sh

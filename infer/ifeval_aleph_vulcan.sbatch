@@ -3,17 +3,17 @@
 # 541 prompts -> IFEval checker labels -> every Aleph model judges every answer x criterion.
 # Resumable: resubmit to continue. Answers from GPU models (infer/ifeval_gpu_submit.sh) that
 # exist when the judge step runs are judged too; rerun later to judge any added afterwards.
-#   sbatch infer/ifeval_aleph.sbatch [generate|judge|all]
+#   sbatch infer/ifeval_aleph_vulcan.sbatch [generate|judge|all]
 #SBATCH --job-name=ifeval-aleph
-#SBATCH --account=aip-lilimou
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
 #SBATCH --time=3-00:00:00
-#SBATCH --output=/scratch/haobin4/metaself/logs/%x_%j.out
+#SBATCH --output=logs/%x_%j.out
 
 set -uo pipefail
 STEP=${1:-all}
-source /scratch/haobin4/metaself/infer/env.sh
+source "${SLURM_SUBMIT_DIR:-.}/infer/env.sh"   # submit from the repo root
+require_vulcan
 set -a; source ~/.aleph_tyk.env; set +a
 MODELS=$(python -c "from infer.ifeval_rubric import ALEPH; print(' '.join(ALEPH))")
 mkdir -p logs/ifeval

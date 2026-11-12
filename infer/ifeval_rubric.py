@@ -27,6 +27,7 @@ import os
 import re
 import threading
 import time
+from infer.cluster import gpus as cluster_gpus
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -249,6 +250,9 @@ GPU_MODELS = {
     "llama-3.1-8b": ("meta-llama/Llama-3.1-8B-Instruct", 1), "llama-3.1-70b": ("meta-llama/Llama-3.1-70B-Instruct", 4),
     "gemma-2-9b": ("google/gemma-2-9b-it", 1), "gemma-2-27b": ("google/gemma-2-27b-it", 2),
 }
+# GPU counts above are for 48 GB L40S; the actual count follows this cluster's GPU memory
+# (infer/cluster.py; 0 = doesn't fit on one node here)
+GPU_MODELS = {k: (r, cluster_gpus(r)) for k, (r, _) in GPU_MODELS.items()}
 
 
 def family(model):

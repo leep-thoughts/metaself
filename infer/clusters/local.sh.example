@@ -1,0 +1,4 @@
+# Copy to infer/clusters/local.sh (gitignored) on each machine for personal overrides.
+# Sourced after infer/clusters/$CC_CLUSTER.sh.
+# ACCOUNT=def-yourpi
+# WORK=/scratch/$USER          # where weights, venv and caches live

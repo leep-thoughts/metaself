@@ -25,6 +25,7 @@ import glob
 import json
 import os
 import sys
+from infer.cluster import gpus as cluster_gpus
 from collections import defaultdict
 
 import numpy as np
@@ -48,6 +49,9 @@ JUDGES = {
     "llama-3.3-70b": ("meta-llama/Llama-3.3-70B-Instruct", 4), "gemma-2-9b": ("google/gemma-2-9b-it", 1),
     "gemma-2-27b": ("google/gemma-2-27b-it", 2),
 }
+# GPU counts above are for 48 GB L40S; the actual count follows this cluster's GPU memory
+# (infer/cluster.py; 0 = doesn't fit on one node here)
+JUDGES = {k: (r, cluster_gpus(r)) for k, (r, _) in JUDGES.items()}
 
 
 def _files(task):
