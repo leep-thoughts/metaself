@@ -16,6 +16,6 @@ rm -rf "$VENV"
 python -m venv "$VENV"
 source "$VENV/bin/activate"
 pip install --no-index --upgrade pip
-pip install --no-index "vllm==$VLLM_VERSION" pandas
+pip install --no-index "vllm==$VLLM_VERSION" pandas bitsandbytes   # bitsandbytes: 4-bit Command-R+
 pip freeze > /scratch/haobin4/metaself/infer/requirements.lock.txt
 python -c "import vllm, torch, transformers; print('vllm', vllm.__version__, '| torch', torch.__version__, 'cuda', torch.version.cuda, '| transformers', transformers.__version__)"

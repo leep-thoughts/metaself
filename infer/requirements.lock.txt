@@ -10,6 +10,7 @@ apache_tvm_ffi==0.1.9+computecanada
 astor==0.8.1+computecanada
 asttokens==3.0.1+computecanada
 attrs==26.1.0+computecanada
+bitsandbytes==0.50.1+computecanada
 blake3==1.0.4+computecanada
 cachetools==7.2.4+computecanada
 cbor2==5.9.0+computecanada

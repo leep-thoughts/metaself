@@ -1,0 +1,4 @@
+GPU 0: NVIDIA L40S (UUID: GPU-6b93a364-a107-7a6e-d976-d1bb7fa1837c)
+INFO 11-12 16:18:34 [arg_utils.py:772] HF_HUB_OFFLINE is True, replace model_id [google/gemma-2-9b-it] to model_path [/scratch/haobin4/hf_home/hub/models--google--gemma-2-9b-it/snapshots/11c9b309abf73637e4b6f9a3fa1e92e615547819]
+INFO 11-12 16:18:34 [api_utils.py:273] non-default args: {'max_model_len': 8192, 'enable_prefix_caching': True, 'gpu_memory_utilization': 0.9, 'disable_log_stats': True, 'model': '/scratch/haobin4/hf_home/hub/models--google--gemma-2-9b-it/snapshots/11c9b309abf73637e4b6f9a3fa1e92e615547819'}
+WARNING 11-12 16:18:34 [envs.py:2041] Unknown vLLM environment variable detected: VLLM_VENV

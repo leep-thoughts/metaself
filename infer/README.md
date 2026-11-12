@@ -46,3 +46,33 @@ Checked on CPU (`check_prompts`), still unchecked on GPU
   `panickssery_compare` may lose its label mass. The smoke test's `verdict_mass` will show it.
 - Mistral-7B-v0.3 cache is Mistral-native (`tokenizer.model.v3`, no HF tokenizer): load
   with `tokenizer_mode="mistral"` in vLLM.
+
+## Yang et al. on Chen's data: run order
+| Step | Command | Where | Output |
+|---|---|---|---|
+| 0 | `python -m infer.yang_data answers` | CPU (done) | `data/yang_answers.jsonl`: 150 problems/task × 18 models = 8,100 answers |
+| 1 | `sbatch infer/aleph_score.sbatch gpt-oss-120b medium` | CPU job, Aleph (free) | `data/scores_gpt-oss-120b.jsonl` |
+| 1b | `sbatch infer/download_models.sbatch` | CPU job | weights in `$HF_HOME` (rerun after accepting gated licenses) |
+| 2 | `bash infer/yang_raters_submit.sh` | **GPU, you submit** | `data/scores_command-r-plus.jsonl`, `data/scores_olmo-2-32b.jsonl` |
+| 3 | `python -m infer.yang_data pairs` | CPU, after ALL score files are complete | `data/yang_judge_<judge>.jsonl`, `data/yang_self_chen.jsonl` |
+| 4 | `bash infer/yang_judges_submit.sh` | **GPU, you submit** | `data/verdicts_<judge>.jsonl` |
+| 5 | `python -m real.yang_real` | CPU | `real/yang_real_results.csv` |
+
+Aleph key: `~/.aleph_tyk.env` (never commit). Aleph is a shared proof of concept; the client keeps 4 requests in flight.
+
+## IFEval rubric run: order
+| Step | Command | Where |
+|---|---|---|
+| 1 | `sbatch infer/ifeval_aleph.sbatch` | CPU job (Aleph): 8 Aleph models answer the 541 prompts, checker labels, 8 judges grade |
+| 2 | `bash infer/ifeval_gpu_submit.sh` | **GPU, you submit** (after step 1's generation is done): 6 Chen models answer, then judge everything; Aleph judges re-run on the new answers |
+| 3 | `python -m real.rubric_real` | CPU: per-judge measures with bootstrap CIs |
+
+Simulator side: `python rubric_sweep.py` (synth/rubric.py, measures/rubric.py).
+Checker: Google's IFEval code as packaged in `lm_eval==0.4.11` (wheelhouse), loaded without lm_eval's task framework.
+
+## β calibration (synth/difficulty.py): run order
+| Step | Command | Where | Output |
+|---|---|---|---|
+| 1 | `python -m infer.beta_data` | CPU (done) | `data/beta_judge_<judge>.jsonl`: ~1k pairs/judge, other models' answers (one right, one wrong), stratified by whether J solves the problem |
+| 2 | `bash infer/beta_judges_submit.sh` | **GPU, you submit** | `data/beta_verdicts_<judge>.jsonl` (Chen direct prompt, both orders) |
+| 3 | `python -m real.beta_fit` | CPU | `real/beta_fit_results.csv`, plus simulator slopes at the fitted β |

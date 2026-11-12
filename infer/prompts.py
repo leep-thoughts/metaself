@@ -329,6 +329,22 @@ TEMPLATES = {
 }
 
 
+def parse_rating(text: str, name: str = "yang_quality"):
+    """(overall score, {dimension: score}) from a rating reply; markdown and <think> stripped.
+    Falls back to the mean of the five dimensions (Yang's definition) if no overall line."""
+    import re
+    body = text.split("</think>")[-1].replace("*", "").replace("_", "")
+    m = re.search(TEMPLATES[name]["score_regex"], body)
+    dims = {}
+    for d in YANG_DIMENSIONS:
+        dm = re.search(rf"{d}\s*:\s*([0-9]+(?:\.[0-9]+)?)", body)
+        dims[d.lower()] = float(dm.group(1)) if dm else None
+    overall = float(m.group(1)) if m else None
+    if overall is None and all(v is not None for v in dims.values()):
+        overall = sum(dims.values()) / len(dims)
+    return overall, dims
+
+
 def messages(name: str, **fields) -> list[dict]:
     """Chat messages for one judgment. fields: question + answer_a/answer_b, or question + answer."""
     t = TEMPLATES[name]

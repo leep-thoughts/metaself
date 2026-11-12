@@ -1,0 +1,10 @@
+labelled 0 new answers -> /scratch/haobin4/metaself/infer/data/ifeval/labels.jsonl
+judging done 16:04:48
+3260/3260  12485/h  eta 0.0h
+judge command-r-7b: 4276 answers, 6574 verdicts done, 0 to run
+judge gemma-4-26b-a4b: 4276 answers, 6574 verdicts done, 0 to run
+judge gemma-4-31b: 4276 answers, 6574 verdicts done, 0 to run
+383/383  1297/h  eta 0.0h
+judge gpt-oss-20b: 4276 answers, 6574 verdicts done, 0 to run
+judge qwen35-122b: 4276 answers, 6574 verdicts done, 0 to run
+judge qwen38-27b: 4276 answers, 6574 verdicts done, 0 to run
