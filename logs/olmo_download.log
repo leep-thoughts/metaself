@@ -1,3 +1,0 @@
-Hint: A new version of huggingface_hub (2.4.0) is available! You are using version 1.33.0+computecanada.
-To update, run: hf update
-Hint: The `hf-cli` skill is not installed. Run `hf skills add -g` to teach your AI agents how to use the `hf` CLI.

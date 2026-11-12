@@ -1,41 +1,0 @@
-== allenai/OLMo-2-0325-32B-Instruct 20:43:26
-   done
-Fetching 28 files:   0%|          | 0/28 [00:00<?, ?it/s]Fetching 28 files: 100%|██████████| 28/28 [00:00<00:00, 299.91it/s]
-== Qwen/Qwen2.5-3B-Instruct 20:43:30
-   done
-Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]Fetching 12 files: 100%|██████████| 12/12 [00:00<00:00, 314.19it/s]
-== Qwen/Qwen2.5-7B-Instruct 20:43:34
-Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files: 100%|██████████| 14/14 [00:00<00:00, 433.53it/s]
-   done
-== Qwen/Qwen2.5-14B-Instruct 20:43:37
-   done
-Fetching 18 files:   0%|          | 0/18 [00:00<?, ?it/s]Fetching 18 files: 100%|██████████| 18/18 [00:00<00:00, 98.52it/s]Fetching 18 files: 100%|██████████| 18/18 [00:00<00:00, 95.77it/s]
-== Qwen/Qwen2.5-32B-Instruct 20:43:42
-Fetching 27 files:   0%|          | 0/27 [00:00<?, ?it/s]Fetching 27 files: 100%|██████████| 27/27 [00:00<00:00, 327.56it/s]
-   done
-== Qwen/Qwen2.5-72B-Instruct 20:43:45
-Still waiting to acquire lock on /scratch/haobin4/hf_home/hub/.locks/models--Qwen--Qwen2.5-72B-Instruct/cd59943f5e87c0ceb76cd5935d6ac5d37546a56ba922c6a0f32aef6ca69c2551.lock (elapsed: 56.2 seconds)
-Fetching 47 files:  60%|█████▉    | 28/47 [03:44<07:33, 23.86s/it]Fetching 47 files:  62%|██████▏   | 29/47 [03:59<06:23, 21.30s/it]Fetching 47 files:  64%|██████▍   | 30/47 [04:03<04:37, 16.34s/it]Fetching 47 files:  72%|███████▏  | 34/47 [04:04<01:23,  6.41s/it]Fetching 47 files:  74%|███████▍  | 35/47 [04:05<01:03,  5.33s/it]Fetching 47 files:  77%|███████▋  | 36/47 [04:32<01:48,  9.91s/it]Fetching 47 files:  79%|███████▊  | 37/47 [04:35<01:22,  8.25s/it]Fetching 47 files:  81%|████████  | 38/47 [04:36<00:57,  6.39s/it]Fetching 47 files:  83%|████████▎ | 39/47 [04:36<00:38,  4.86s/it]Fetching 47 files:  85%|████████▌ | 40/47 [04:38<00:28,  4.02s/it]Fetching 47 files:  87%|████████▋ | 41/47 [04:57<00:49,  8.33s/it]Fetching 47 files:  89%|████████▉ | 42/47 [05:10<00:47,  9.53s/it]Fetching 47 files:  96%|█████████▌| 45/47 [05:10<00:08,  4.31s/it]Fetching 47 files:  98%|█████████▊| 46/47 [05:10<00:03,  3.47s/it]Fetching 47 files: 100%|██████████| 47/47 [05:10<00:00,  2.70s/it]Fetching 47 files: 100%|██████████| 47/47 [05:10<00:00,  6.61s/it]
-   done
-== meta-llama/Llama-3.2-3B-Instruct 20:48:59
-Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]Fetching 12 files: 100%|██████████| 12/12 [00:00<00:00, 579.18it/s]
-   done
-== meta-llama/Llama-3.1-8B-Instruct 20:49:02
-Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files: 100%|██████████| 14/14 [00:00<00:00, 642.57it/s]
-   done
-== meta-llama/Llama-3.1-70B-Instruct 20:49:07
-   done
-Fetching 40 files:  88%|████████▊ | 35/40 [02:52<00:15,  3.01s/it]Fetching 40 files:  92%|█████████▎| 37/40 [02:52<00:05,  1.69s/it]Fetching 40 files:  95%|█████████▌| 38/40 [02:53<00:02,  1.46s/it]Fetching 40 files:  98%|█████████▊| 39/40 [02:55<00:01,  1.72s/it]Still waiting to acquire lock on /scratch/haobin4/hf_home/hub/.locks/models--meta-llama--Llama-3.1-70B-Instruct/8054984696ef858ada3875536f41471f4a890b340d60095e281fd7fc813e6ffa.lock (elapsed: 20.0 seconds)
-Fetching 40 files: 100%|██████████| 40/40 [03:00<00:00,  2.60s/it]Fetching 40 files: 100%|██████████| 40/40 [03:00<00:00,  4.52s/it]
-== meta-llama/Llama-3.3-70B-Instruct 20:52:11
-[1m[31mError: Access denied. This repository requires approval.[0m
-[90mHint: set HF_DEBUG=1 as environment variable for full traceback.[0m
-   FAILED (gated? accept the license on huggingface.co, then resubmit)
-== google/gemma-2-9b-it 20:52:14
-Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:   7%|▋         | 1/14 [00:00<00:02,  4.71it/s]Fetching 14 files:  29%|██▊       | 4/14 [00:00<00:00, 11.34it/s]Fetching 14 files:  43%|████▎     | 6/14 [00:00<00:00, 10.44it/s]Fetching 14 files:  57%|█████▋    | 8/14 [00:01<00:01,  5.98it/s]Fetching 14 files:  64%|██████▍   | 9/14 [00:01<00:01,  4.08it/s]Fetching 14 files:  71%|███████▏  | 10/14 [00:04<00:03,  1.27it/s]Fetching 14 files:  79%|███████▊  | 11/14 [00:26<00:18,  6.31s/it]Fetching 14 files:  86%|████████▌ | 12/14 [00:28<00:10,  5.11s/it]Fetching 14 files:  93%|█████████▎| 13/14 [00:32<00:04,  4.63s/it]Fetching 14 files: 100%|██████████| 14/14 [00:32<00:00,  3.43s/it]Fetching 14 files: 100%|██████████| 14/14 [00:32<00:00,  2.32s/it]
-   done
-== google/gemma-2-27b-it 20:52:48
-Still waiting to acquire lock on /scratch/haobin4/hf_home/hub/.locks/models--google--gemma-2-27b-it/c1448b676de8e8c21a7585ed60073ecf54f448082adedc125ca33a35246b198e.lock (elapsed: 50.0 seconds)
-Fetching 22 files: 100%|██████████| 22/22 [02:03<00:00, 10.94s/it]Fetching 22 files: 100%|██████████| 22/22 [02:03<00:00,  5.60s/it]
-   done
-1.2T	/scratch/haobin4/hf_home/hub
