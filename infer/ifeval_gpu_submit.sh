@@ -1,6 +1,7 @@
 #!/bin/bash
 # IFEval rubric run, self-hosted models (GPU). Run from the repo root:
-#   bash infer/ifeval_gpu_submit.sh
+#   bash infer/ifeval_gpu_submit.sh                               # IFEval
+#   RUBRIC_DATASET=healthbench bash infer/ifeval_gpu_submit.sh    # HealthBench (after Aleph generation)
 # Submits, with Slurm dependencies so you run it once:
 #   1. one generation job per model (answers to the 541 prompts)
 #   2. after ALL generations: one judge job per model (every answer x criterion, Aleph's included)
@@ -35,7 +36,7 @@ if [ "${CC_CLUSTER:-}" != vulcan ]; then
     exit 0
 fi
 # also wait for any Aleph IFEval job still running, so two jobs never append to the same file
-RUNNING=$(squeue -u "$USER" -n ifeval-aleph -h -o %i | paste -sd: -)
+RUNNING=$(squeue -u "$USER" -n ifeval-aleph,hb-aleph -h -o %i | paste -sd: -)
 ADEP=$DEP${RUNNING:+,afterany:$RUNNING}
 id=$(sbatch --parsable --dependency=$ADEP infer/ifeval_aleph_vulcan.sbatch judge)
 echo "Aleph judges on the new answers (CPU): job $id"

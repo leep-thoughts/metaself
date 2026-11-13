@@ -1,0 +1,540 @@
+{
+ "residual_corr_across_judges": 0.6098381875793353,
+ "real": {
+  "what_moves_p": {
+   "opponent": {
+    "units": 192,
+    "p_sd_within": 0.222,
+    "tpr": {
+     "p": 0.043,
+     "acc": 1.113
+    },
+    "fpr_hspp": {
+     "p": 0.347,
+     "acc": 0.191
+    },
+    "equal_opportunity": {
+     "p": 0.426,
+     "acc": 1.575
+    },
+    "panickssery": {
+     "p": 0.278,
+     "acc": 1.061
+    }
+   },
+   "proxy": {
+    "units": 1188,
+    "p_sd_within": 0.05,
+    "tpr": {
+     "p": 0.149,
+     "acc": 1.066
+    },
+    "fpr_hspp": {
+     "p": 0.336,
+     "acc": -0.074
+    },
+    "equal_opportunity": {
+     "p": 0.7,
+     "acc": 1.451
+    },
+    "panickssery": {
+     "p": 0.372,
+     "acc": 0.933
+    }
+   },
+   "difficulty": {
+    "units": 5026,
+    "p_sd_within": 0.184,
+    "tpr": {
+     "p": -0.124,
+     "acc": 0.899
+    },
+    "fpr_hspp": {
+     "p": -0.012,
+     "acc": -0.895
+    },
+    "equal_opportunity": {
+     "p": -0.139,
+     "acc": -0.08
+    },
+    "panickssery": {
+     "p": 0.017,
+     "acc": 0.608
+    }
+   }
+  },
+  "grid": {
+   "n_judges": 8,
+   "median": {
+    "panickssery_p": 0.185,
+    "panickssery_a": 1.012,
+    "equal_opportunity_p": 0.683,
+    "equal_opportunity_a": 1.148,
+    "hspp_p": 0.791,
+    "hspp_a": 0.063,
+    "roytburg_p": -0.132,
+    "roytburg_a": -0.075
+   },
+   "per_judge": [
+    {
+     "judge": "gemma-2-9b",
+     "n_points": 22,
+     "panickssery_p": 0.226,
+     "panickssery_a": 0.847,
+     "equal_opportunity_p": 0.847,
+     "equal_opportunity_a": 0.482,
+     "hspp_p": 0.908,
+     "hspp_a": -0.569,
+     "roytburg_p": -0.0,
+     "roytburg_a": -0.893
+    },
+    {
+     "judge": "llama-3.1-70b",
+     "n_points": 24,
+     "panickssery_p": 0.143,
+     "panickssery_a": 1.106,
+     "equal_opportunity_p": 0.519,
+     "equal_opportunity_a": 1.764,
+     "hspp_p": 0.673,
+     "hspp_a": 0.586,
+     "roytburg_p": -0.151,
+     "roytburg_a": -0.007
+    },
+    {
+     "judge": "llama-3.1-8b",
+     "n_points": 15,
+     "panickssery_p": 0.136,
+     "panickssery_a": 0.792,
+     "equal_opportunity_p": 0.227,
+     "equal_opportunity_a": 0.657,
+     "hspp_p": 0.157,
+     "hspp_a": -0.501,
+     "roytburg_p": -0.028,
+     "roytburg_a": -0.501
+    },
+    {
+     "judge": "llama-3.3-70b",
+     "n_points": 15,
+     "panickssery_p": 0.077,
+     "panickssery_a": 1.032,
+     "equal_opportunity_p": 0.359,
+     "equal_opportunity_a": 1.581,
+     "hspp_p": 0.533,
+     "hspp_a": 0.465,
+     "roytburg_p": -0.678,
+     "roytburg_a": 0.214
+    },
+    {
+     "judge": "qwen-2.5-32b",
+     "n_points": 20,
+     "panickssery_p": 0.313,
+     "panickssery_a": 1.038,
+     "equal_opportunity_p": 1.629,
+     "equal_opportunity_a": 1.3,
+     "hspp_p": 1.671,
+     "hspp_a": 0.188,
+     "roytburg_p": -0.32,
+     "roytburg_a": 0.097
+    },
+    {
+     "judge": "qwen-2.5-3b",
+     "n_points": 15,
+     "panickssery_p": -0.151,
+     "panickssery_a": 0.904,
+     "equal_opportunity_p": -0.234,
+     "equal_opportunity_a": 0.813,
+     "hspp_p": -0.103,
+     "hspp_a": -0.062,
+     "roytburg_p": -0.113,
+     "roytburg_a": -0.972
+    },
+    {
+     "judge": "qwen-2.5-72b",
+     "n_points": 18,
+     "panickssery_p": 0.342,
+     "panickssery_a": 1.061,
+     "equal_opportunity_p": 1.077,
+     "equal_opportunity_a": 1.449,
+     "hspp_p": 1.059,
+     "hspp_a": 0.319,
+     "roytburg_p": -0.31,
+     "roytburg_a": 0.114
+    },
+    {
+     "judge": "qwen-2.5-7b",
+     "n_points": 25,
+     "panickssery_p": 0.448,
+     "panickssery_a": 0.992,
+     "equal_opportunity_p": 1.487,
+     "equal_opportunity_a": 0.996,
+     "hspp_p": 1.372,
+     "hspp_a": -0.105,
+     "roytburg_p": -0.004,
+     "roytburg_a": -0.143
+    }
+   ]
+  }
+ },
+ "shuffle_items": {
+  "what_moves_p": {
+   "opponent": {
+    "units": 192,
+    "p_sd_within": 0.222,
+    "tpr": {
+     "p": 0.053,
+     "acc": 1.114
+    },
+    "fpr_hspp": {
+     "p": 0.341,
+     "acc": 0.23
+    },
+    "equal_opportunity": {
+     "p": 0.43,
+     "acc": 1.624
+    },
+    "panickssery": {
+     "p": 0.283,
+     "acc": 1.068
+    }
+   },
+   "proxy": {
+    "units": 1188,
+    "p_sd_within": 0.05,
+    "tpr": {
+     "p": 0.148,
+     "acc": 1.067
+    },
+    "fpr_hspp": {
+     "p": 0.306,
+     "acc": -0.116
+    },
+    "equal_opportunity": {
+     "p": 0.667,
+     "acc": 1.432
+    },
+    "panickssery": {
+     "p": 0.357,
+     "acc": 0.926
+    }
+   },
+   "difficulty": {
+    "units": 5026,
+    "p_sd_within": 0.184,
+    "tpr": {
+     "p": -0.121,
+     "acc": 0.881
+    },
+    "fpr_hspp": {
+     "p": 0.017,
+     "acc": -0.847
+    },
+    "equal_opportunity": {
+     "p": -0.038,
+     "acc": 0.05
+    },
+    "panickssery": {
+     "p": 0.046,
+     "acc": 0.536
+    }
+   }
+  },
+  "grid": {
+   "n_judges": 8,
+   "median": {
+    "panickssery_p": 0.177,
+    "panickssery_a": 1.161,
+    "equal_opportunity_p": 0.663,
+    "equal_opportunity_a": 1.832,
+    "hspp_p": 0.771,
+    "hspp_a": 0.586,
+    "roytburg_p": -0.023,
+    "roytburg_a": -0.08
+   },
+   "per_judge": [
+    {
+     "judge": "gemma-2-9b",
+     "n_points": 11,
+     "panickssery_p": 0.107,
+     "panickssery_a": 1.062,
+     "equal_opportunity_p": 0.862,
+     "equal_opportunity_a": 1.274,
+     "hspp_p": 0.937,
+     "hspp_a": 0.121,
+     "roytburg_p": 0.07,
+     "roytburg_a": -0.855
+    },
+    {
+     "judge": "llama-3.1-70b",
+     "n_points": 10,
+     "panickssery_p": 0.148,
+     "panickssery_a": 1.183,
+     "equal_opportunity_p": 0.727,
+     "equal_opportunity_a": 1.915,
+     "hspp_p": 0.89,
+     "hspp_a": 0.676,
+     "roytburg_p": 0.048,
+     "roytburg_a": -0.161
+    },
+    {
+     "judge": "llama-3.1-8b",
+     "n_points": 16,
+     "panickssery_p": 0.112,
+     "panickssery_a": 0.81,
+     "equal_opportunity_p": 0.125,
+     "equal_opportunity_a": 0.786,
+     "hspp_p": 0.065,
+     "hspp_a": -0.422,
+     "roytburg_p": -0.034,
+     "roytburg_a": -0.34
+    },
+    {
+     "judge": "llama-3.3-70b",
+     "n_points": 12,
+     "panickssery_p": 0.241,
+     "panickssery_a": 1.138,
+     "equal_opportunity_p": 1.215,
+     "equal_opportunity_a": 2.187,
+     "hspp_p": 1.424,
+     "hspp_a": 1.063,
+     "roytburg_p": -0.214,
+     "roytburg_a": 0.29
+    },
+    {
+     "judge": "qwen-2.5-32b",
+     "n_points": 11,
+     "panickssery_p": 0.207,
+     "panickssery_a": 1.22,
+     "equal_opportunity_p": 0.439,
+     "equal_opportunity_a": 2.726,
+     "hspp_p": 0.609,
+     "hspp_a": 1.507,
+     "roytburg_p": -0.206,
+     "roytburg_a": 0.208
+    },
+    {
+     "judge": "qwen-2.5-3b",
+     "n_points": 15,
+     "panickssery_p": -0.231,
+     "panickssery_a": 0.962,
+     "equal_opportunity_p": -0.263,
+     "equal_opportunity_a": 1.386,
+     "hspp_p": -0.135,
+     "hspp_a": 0.022,
+     "roytburg_p": -0.013,
+     "roytburg_a": -0.461
+    },
+    {
+     "judge": "qwen-2.5-72b",
+     "n_points": 10,
+     "panickssery_p": 0.34,
+     "panickssery_a": 1.234,
+     "equal_opportunity_p": 0.599,
+     "equal_opportunity_a": 2.613,
+     "hspp_p": 0.651,
+     "hspp_a": 1.391,
+     "roytburg_p": -0.327,
+     "roytburg_a": 0.603
+    },
+    {
+     "judge": "qwen-2.5-7b",
+     "n_points": 13,
+     "panickssery_p": 0.463,
+     "panickssery_a": 1.202,
+     "equal_opportunity_p": 1.286,
+     "equal_opportunity_a": 1.75,
+     "hspp_p": 1.239,
+     "hspp_a": 0.497,
+     "roytburg_p": 0.321,
+     "roytburg_a": 0.002
+    }
+   ]
+  }
+ },
+ "no_shared_item": {
+  "what_moves_p": {
+   "opponent": {
+    "units": 192,
+    "p_sd_within": 0.222,
+    "tpr": {
+     "p": 0.045,
+     "acc": 1.124
+    },
+    "fpr_hspp": {
+     "p": 0.334,
+     "acc": 0.256
+    },
+    "equal_opportunity": {
+     "p": 0.396,
+     "acc": 1.68
+    },
+    "panickssery": {
+     "p": 0.289,
+     "acc": 1.076
+    }
+   },
+   "proxy": {
+    "units": 1188,
+    "p_sd_within": 0.05,
+    "tpr": {
+     "p": 0.12,
+     "acc": 1.074
+    },
+    "fpr_hspp": {
+     "p": 0.304,
+     "acc": -0.066
+    },
+    "equal_opportunity": {
+     "p": 0.635,
+     "acc": 1.405
+    },
+    "panickssery": {
+     "p": 0.331,
+     "acc": 0.932
+    }
+   },
+   "difficulty": {
+    "units": 5026,
+    "p_sd_within": 0.184,
+    "tpr": {
+     "p": -0.14,
+     "acc": 0.891
+    },
+    "fpr_hspp": {
+     "p": 0.022,
+     "acc": -0.835
+    },
+    "equal_opportunity": {
+     "p": -0.128,
+     "acc": 0.05
+    },
+    "panickssery": {
+     "p": 0.048,
+     "acc": 0.591
+    }
+   }
+  },
+  "grid": {
+   "n_judges": 9,
+   "median": {
+    "panickssery_p": 0.085,
+    "panickssery_a": 1.035,
+    "equal_opportunity_p": 0.258,
+    "equal_opportunity_a": 1.259,
+    "hspp_p": 0.38,
+    "hspp_a": 0.141,
+    "roytburg_p": 0.086,
+    "roytburg_a": -0.033
+   },
+   "per_judge": [
+    {
+     "judge": "gemma-2-9b",
+     "n_points": 28,
+     "panickssery_p": 0.085,
+     "panickssery_a": 1.018,
+     "equal_opportunity_p": 0.83,
+     "equal_opportunity_a": 1.259,
+     "hspp_p": 0.89,
+     "hspp_a": 0.129,
+     "roytburg_p": 0.006,
+     "roytburg_a": -0.022
+    },
+    {
+     "judge": "llama-3.1-70b",
+     "n_points": 28,
+     "panickssery_p": 0.184,
+     "panickssery_a": 1.084,
+     "equal_opportunity_p": 0.393,
+     "equal_opportunity_a": 1.623,
+     "hspp_p": 0.477,
+     "hspp_a": 0.462,
+     "roytburg_p": -0.033,
+     "roytburg_a": 0.097
+    },
+    {
+     "judge": "llama-3.1-8b",
+     "n_points": 40,
+     "panickssery_p": 0.023,
+     "panickssery_a": 0.912,
+     "equal_opportunity_p": 0.258,
+     "equal_opportunity_a": 0.891,
+     "hspp_p": 0.226,
+     "hspp_a": -0.273,
+     "roytburg_p": 0.086,
+     "roytburg_a": -0.194
+    },
+    {
+     "judge": "llama-3.2-3b",
+     "n_points": 44,
+     "panickssery_p": -0.011,
+     "panickssery_a": 0.984,
+     "equal_opportunity_p": 0.11,
+     "equal_opportunity_a": 1.202,
+     "hspp_p": 0.036,
+     "hspp_a": -0.029,
+     "roytburg_p": 0.163,
+     "roytburg_a": -0.017
+    },
+    {
+     "judge": "llama-3.3-70b",
+     "n_points": 16,
+     "panickssery_p": 0.059,
+     "panickssery_a": 1.035,
+     "equal_opportunity_p": 0.086,
+     "equal_opportunity_a": 1.235,
+     "hspp_p": 0.38,
+     "hspp_a": 0.141,
+     "roytburg_p": -0.349,
+     "roytburg_a": -0.033
+    },
+    {
+     "judge": "qwen-2.5-32b",
+     "n_points": 19,
+     "panickssery_p": 0.297,
+     "panickssery_a": 1.181,
+     "equal_opportunity_p": 0.663,
+     "equal_opportunity_a": 2.323,
+     "hspp_p": 0.827,
+     "hspp_a": 1.125,
+     "roytburg_p": 0.089,
+     "roytburg_a": -0.283
+    },
+    {
+     "judge": "qwen-2.5-3b",
+     "n_points": 35,
+     "panickssery_p": 0.051,
+     "panickssery_a": 0.864,
+     "equal_opportunity_p": -0.089,
+     "equal_opportunity_a": 0.819,
+     "hspp_p": -0.092,
+     "hspp_a": -0.364,
+     "roytburg_p": 0.092,
+     "roytburg_a": -0.181
+    },
+    {
+     "judge": "qwen-2.5-72b",
+     "n_points": 13,
+     "panickssery_p": 0.271,
+     "panickssery_a": 1.277,
+     "equal_opportunity_p": 0.115,
+     "equal_opportunity_a": 2.984,
+     "hspp_p": 0.274,
+     "hspp_a": 1.742,
+     "roytburg_p": -0.22,
+     "roytburg_a": 0.55
+    },
+    {
+     "judge": "qwen-2.5-7b",
+     "n_points": 15,
+     "panickssery_p": 0.432,
+     "panickssery_a": 1.078,
+     "equal_opportunity_p": 0.787,
+     "equal_opportunity_a": 1.557,
+     "hspp_p": 0.818,
+     "hspp_a": 0.396,
+     "roytburg_p": 0.315,
+     "roytburg_a": -0.493
+    }
+   ]
+  }
+ }
+}

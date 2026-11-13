@@ -215,6 +215,10 @@ def main():
         engine["max_model_len"] = args.max_model_len
     if args.max_num_seqs:
         engine["max_num_seqs"] = args.max_num_seqs
+    if args.pipeline_parallel > 1:
+        # vLLM 0.25's async scheduler asserts (num_output_placeholders) with pipeline parallel:
+        # Command-R+ died after 5 h (job 2310972)
+        engine["async_scheduling"] = False
     # resumable: rows already in --output (same id, game, template) are skipped; results are
     # appended every --chunk rows, so a timed-out job keeps its work. Resubmit to continue.
     key = lambda r: (r["id"], r.get("game"), r["template"])

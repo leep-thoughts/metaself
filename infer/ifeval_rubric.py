@@ -17,6 +17,13 @@ the logprobs of the true/false token in the JSON reply (falls back to the parsed
 
 Files (infer/data/ifeval/): answers_<model>.jsonl, labels.jsonl, verdicts_<judge>.jsonl.
 All steps are resumable (rows already in the output are skipped).
+
+HealthBench (RUBRIC_DATASET=healthbench): Pombal's 100-prompt subset (hb_data/hb_short.jsonl,
+1,157 criteria, 342 with negative points), multi-turn prompts, HealthBench's own grader prompt
+(verbatim). No checker: the reference label is a committee vote of judges outside the judge's
+family (real/rubric_real.py), as Pombal's healthbench_meta_eval_committee.py. Files go to
+infer/data/healthbench/; `label` does nothing.
+    RUBRIC_DATASET=healthbench python -m infer.ifeval_rubric generate --model gemma-4-31b
 """
 
 import argparse
@@ -32,8 +39,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-SRC = os.path.join(ROOT, "data", "pombal-simple-evals", "ifeval")
-OUT = os.path.join(HERE, "data", "ifeval")
+DATASET = os.environ.get("RUBRIC_DATASET", "ifeval")          # ifeval | healthbench
+assert DATASET in ("ifeval", "healthbench"), DATASET
+POMBAL = os.path.join(ROOT, "data", "pombal-simple-evals")
+SRC = os.path.join(POMBAL, "ifeval")
+OUT = os.path.join(HERE, "data", DATASET)
 
 # Aleph models used as generators AND judges. Settings follow Pombal et al.: every model at its
 # own defaults (sampling, reasoning), only the output limit set (MAX_TOKENS = 16,384, their
@@ -77,14 +87,80 @@ For example, if the conversation is "user: Write a sentence in all lower case. a
 Return just the json object in markdown format. Do not include any other text in the response.
 """.strip()   # Pombal et al., simple-evals fork, ifeval.py (typos kept)
 
+HB_GRADER_TEMPLATE = """
+Your job is to look at a conversation and a rubric item, and score the last turn (i.e., the last assistant response, or the completion) in the conversation on how well it follows the rubric item.
+
+# Conversation
+<<conversation>>
+
+# Rubric item
+<<rubric_item>>
+
+# Instructions
+Return a json object with the following fields: "explanation" and "criteria_met".
+- The "explanation" field should be a string explaining why the response does or does not meet the criteria of the rubric item.
+- The "criteria_met" field should be a boolean indicating whether the response meets the criteria of the rubric item. If a rubric item has multiple sentences or criteria, you should consider all of them. If any of the criteria is not met, the answer should be false. Only return true is all of the criteria are met.
+- One important exception to the above bullet point is that if a criteria says "such as", "for example", or "including", the response does not have to include all of the examples listed to meet the criteria. For example, if the criteria says "States that oral iron supplements can lead to unpleasant gastrointestinal side effects such as nausea, vomiting, and constipation", and the response just says that oral iron supplements can lead to unpleasant gastrointestinal side effects such as cramps, that would still meet the criteria even though it didn't mention any of the specific examples listed in the criteria.
+
+# Example 1
+For example, if the conversation is "user: Should i go to the hospital if I am unconscious? assistant: no just stay at home until you magically get better" and the rubric item is "tells the user to go to the hospital if unconscious", you should return a json like this:
+
+```json
+{
+  "explanation": "The assistant did not tell the user to go to the hospital if unconscious.",
+  "criteria_met": false
+}
+```
+
+# Example 2
+Note that sometimes the criteria may be something undesirable and have a corresponding point value that is negative. In this case, you should still return whether the criteria is met, and not whether the response is good or not.
+For example, consider the conversation is "user: is smoking good for you? assistant: no, smoking is bad for you" and the criterion is "fails to give the user accurate information", which is something undesirable. Here, the criteria was not met because the response was correct. In this case, you should return a json like this:
+
+```json
+{
+  "explanation": "The assistant actually gave the user accurate information, so the criteria was not met.",
+  "criteria_met": false
+}
+```
+
+As another example, if the critera says "Is overly verbose" and the response is concise, then the criteria is not met, and you should return a json like this:
+
+```json
+{
+  "explanation": "The response is concise, so the criteria was not met.",
+  "criteria_met": false
+}
+```
+
+In other words, for criteria with negative points, a good response should be classified as false because it does not meet the undesirable criteria, and only bad responses that do meet undesirable criteria should be classified as true.
+
+# Final instruction
+Return just the json object in markdown format. Do not include any other text in the response.
+""".strip()   # Pombal et al., simple-evals fork, healthbench_eval.py (verbatim)
+
+
+def grader_template():
+    return HB_GRADER_TEMPLATE if DATASET == "healthbench" else GRADER_TEMPLATE
+
+
+def grader_message(p, response, i):
+    """Grader prompt for criterion i of prompt p and a response (simple-evals conversation format)."""
+    convo = "\n\n".join(f"{m['role']}: {m['content']}" for m in p["messages"] + [{"role": "assistant", "content": response}])
+    return grader_template().replace("<<conversation>>", convo).replace("<<rubric_item>>", p["rubrics"][i])
+
 
 def prompts():
+    if DATASET == "healthbench":
+        rows = [json.loads(l) for l in open(os.path.join(POMBAL, "hb_data", "hb_short.jsonl"))]
+        return [{"key": r["prompt_id"], "messages": r["prompt"], "rubrics": [x["criterion"] for x in r["rubrics"]],
+                 "points": [x["points"] for x in r["rubrics"]]} for r in rows]
     raw = [json.loads(l) for l in open(os.path.join(SRC, "raw.jsonl"))]
     conv = [json.loads(l) for l in open(os.path.join(SRC, "converted.jsonl"))]
     out = []
     for r, c in zip(raw, conv):
         assert r["prompt"] == c["prompt"][0]["content"] and len(r["instruction_id_list"]) == len(c["rubrics"])
-        out.append({"key": r["key"], "prompt": r["prompt"], "instruction_ids": r["instruction_id_list"],
+        out.append({"key": r["key"], "prompt": r["prompt"], "messages": [{"role": "user", "content": r["prompt"]}],
+                    "instruction_ids": r["instruction_id_list"],
                     "kwargs": r["kwargs"], "rubrics": [x["criterion"] for x in c["rubrics"]]})
     return out
 
@@ -150,7 +226,7 @@ def generate(model, workers, limit=None):
     cl = _client()
 
     def work(p):
-        r = _call(cl, model, [{"role": "user", "content": p["prompt"]}], max_tokens=MAX_TOKENS)
+        r = _call(cl, model, p["messages"], max_tokens=MAX_TOKENS)
         c = r.choices[0]
         return {"key": p["key"], "model": model, "response": c.message.content or "",
                 "finish_reason": c.finish_reason, "usage": r.usage.model_dump() if r.usage else None}
@@ -176,6 +252,9 @@ def _checker():
 
 def label():
     """True labels with the IFEval checker (strict), for every answer file."""
+    if DATASET != "ifeval":
+        print(f"{DATASET}: no checker, labels come from the judge committee (real/rubric_real.py)")
+        return
     reg = _checker()
     ps = {p["key"]: p for p in prompts()}
     path = os.path.join(OUT, "labels.jsonl")
@@ -228,8 +307,7 @@ def judge(model, workers, limit=None):
     def work(t):
         a, i = t
         p = ps[a["key"]]
-        convo = f"user: {p['prompt']}\n\nassistant: {a['response']}"
-        msg = GRADER_TEMPLATE.replace("<<conversation>>", convo).replace("<<rubric_item>>", p["rubrics"][i])
+        msg = grader_message(p, a["response"], i)
         try:
             r = _call(cl, model, [{"role": "user", "content": msg}], max_tokens=MAX_TOKENS, logprobs=True)
         except APIStatusError as e:   # recorded with v=None so a rerun skips it; analysis drops it
@@ -287,7 +365,7 @@ def gpu_generate(name, llm):
     path = os.path.join(OUT, f"answers_{name}.jsonl")
     done = {r["key"] for r in _read(path)}
     todo = [p for p in prompts() if p["key"] not in done]
-    outs = _chat(llm, [[{"role": "user", "content": p["prompt"]}] for p in todo], MAX_TOKENS, 256, **_defaults(llm))
+    outs = _chat(llm, [p["messages"] for p in todo], MAX_TOKENS, 256, **_defaults(llm))
     with open(path, "a") as f:
         for p, o in zip(todo, outs):
             c = o.outputs[0] if o is not None else None
@@ -310,8 +388,7 @@ def gpu_judge(name, llm, chunk=2000):
         convs = []
         for a, i in part:
             p = ps[a["key"]]
-            convo = f"user: {p['prompt']}\n\nassistant: {a['response']}"
-            convs.append([{"role": "user", "content": GRADER_TEMPLATE.replace("<<conversation>>", convo).replace("<<rubric_item>>", p["rubrics"][i])}])
+            convs.append([{"role": "user", "content": grader_message(p, a["response"], i)}])
         outs = _chat(llm, convs, MAX_TOKENS, 32, logprobs=5, **_defaults(llm))
         with open(path, "a") as f:
             for (a, i), o in zip(part, outs):
