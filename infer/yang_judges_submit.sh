@@ -17,7 +17,8 @@ for j in $JUDGES; do
     [ -f "$in" ] || { echo "skip $j: $in missing (run python -m infer.yang_data pairs)"; continue; }
     read -r repo gpus < <(python -c "from infer.yang_data import JUDGES; r, g = JUDGES['$j']; print(r, g)")
     [ "$gpus" -gt 0 ] || { echo "skip $j: does not fit on one $GPU_TYPE node (run it on Vulcan)"; continue; }
-    sbatch --job-name=yang-$j $(gpu_flags $gpus) --time=06:00:00 --export=ALL,HF_HUB_OFFLINE=1 \
+    id=$(sbatch --parsable --job-name=yang-$j $(gpu_flags $gpus) --time=06:00:00 --export=ALL,HF_HUB_OFFLINE=1 \
         infer/judge.sbatch --model "$repo" --template row --both-orders --tensor-parallel "$gpus" \
-        --max-model-len 8192 --input "$in" --output infer/data/verdicts_$j.jsonl
+        --max-model-len 8192 --input "$in" --output infer/data/verdicts_$j.jsonl)
+    echo "yang $j: job $id"
 done

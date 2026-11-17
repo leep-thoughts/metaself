@@ -3,7 +3,8 @@
 # Resumable and idempotent: gated repos you haven't accepted are skipped with a message;
 # resubmit after accepting them on huggingface.co.
 #   sbatch infer/download_models.sbatch      Vulcan (compute nodes have internet)
-#   bash infer/download_models.sbatch        Narval: on the LOGIN node (no internet on compute nodes)
+#   bash infer/download_models.sbatch        Narval/Fir: on the LOGIN node (no internet on compute nodes)
+#   bash infer/download_models.sbatch <repo> ...   only these (e.g. the 70B models on Fir)
 #SBATCH --job-name=hf-download
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
@@ -17,7 +18,8 @@ if [ -n "${SLURM_JOB_ID:-}" ] && [ "${COMPUTE_INTERNET:-1}" = 0 ]; then
 fi
 # only models that fit on one GPU node of this cluster (70B skipped on Narval)
 MODELS=$(python -c "from infer.yang_data import JUDGES; print(' '.join(r for r, g in JUDGES.values() if g))")
-for repo in allenai/OLMo-2-0325-32B-Instruct $MODELS; do
+LIST=${*:-allenai/OLMo-2-0325-32B-Instruct $MODELS}
+for repo in $LIST; do
     echo "== $repo $(date +%T)"
     hf download "$repo" --exclude "original/*" --exclude "*.pth" > /dev/null 2> >(tail -2 >&2) \
         && echo "   done" || echo "   FAILED (gated? accept the license on huggingface.co, then resubmit)"

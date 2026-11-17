@@ -60,6 +60,9 @@ def terms(df):
 
 
 def main():
+    from infer.ifeval_rubric import DATASET
+    if DATASET != "ifeval":
+        raise SystemExit("rubric_did: IFEval only for now (HealthBench labels depend on the judge's family)")
     df = units()
     t = terms(df)
     # per J and unit: average the K's (each unit counts once)

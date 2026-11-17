@@ -98,6 +98,9 @@ def load_scores():
     raters = []
     for path in sorted(glob.glob(os.path.join(DATA, "scores_*.jsonl"))):
         rater = os.path.basename(path)[len("scores_"):-len(".jsonl")]
+        keep = os.environ.get("YANG_RATERS")          # e.g. YANG_RATERS=gpt-oss-120b,command-r-plus
+        if keep and rater not in keep.split(","):
+            continue
         raters.append(rater)
         for line in open(path):
             r = json.loads(line)
@@ -171,3 +174,13 @@ def build_pairs():
                                     "gap": scores_of(task, idx, j) - scores_of(task, idx, k),
                                     "question": q, "answer_a": aj, "answer_b": ak}) + "\n")
         print(f"{judge:14s} self pairs {len(judge_rows.get(judge, [])):5d}   null pairs {len(nulls):5d} (x2 orders each)")
+
+
+if __name__ == "__main__":
+    step = sys.argv[1] if len(sys.argv) > 1 else ""
+    if step == "answers":
+        build_answers()
+    elif step == "pairs":
+        build_pairs()
+    else:
+        raise SystemExit("usage: python -m infer.yang_data answers|pairs")
