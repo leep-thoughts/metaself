@@ -20,7 +20,8 @@ Options
 | 1 | Vulcan | `git push` (code incl. `infer/clusters/fir.sh`) |
 | 2 | Fir login | `cd $SCRATCH && git clone <repo> metaself && cd metaself`; `cp infer/clusters/local.sh.example infer/clusters/local.sh` (set ACCOUNT); copy `~/.cache/huggingface/token` |
 | 3 | Fir login | `bash scripts/fir_70b.sh setup` (venv + 3 × 70B weights, hours; use tmux) |
-| 4 | Vulcan | `bash scripts/sync_fir.sh push` (Pombal data, Yang pairs) |
+| 3b | Vulcan | once: `bash scripts/sync_fir.sh globus-setup` (Globus CLI + `globus login`), then `export VULCAN_EP=<id>`; activate both collections once in the Globus web app |
+| 4 | Vulcan | `bash scripts/sync_fir.sh push` (Pombal data, Yang pairs; Globus by default, `SYNC=rsync` for ssh) |
 | 5 | Fir | `bash scripts/fir_70b.sh start` (3 Yang judges + Llama-70B HealthBench answers) |
 | 6 | Vulcan | `bash scripts/vulcan_reroute.sh cancel` (stuck 70B jobs + their dependants) |
 | 7 | Vulcan | after Fir's answers job: `bash scripts/sync_fir.sh pull`, then `bash scripts/vulcan_reroute.sh hb` |

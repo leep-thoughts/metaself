@@ -1,7 +1,7 @@
 # Confound-controlled self-preference: pipeline design (draft, 2026-11-13)
 
 Plan item 5: "These measures don't work; here is how to make it work in practice." Not naive,
-not contrived, and validated. Status: **design only**; building blocks exist (listed per stage).
+not contrived, and validated. Status: design + **stage S3 and S4 validated on real placebo tests (2026-11-17, §6)**; the rest not built.
 
 ## 1. What the pipeline must survive
 
@@ -24,7 +24,7 @@ Every confound below is measured on real data, not assumed.
 |---|---|---|---|
 | **S1 Units** | Item x, J's answer, ≥ 3 reference answers spanning strength, oracle label (checker/tests; committee where no checker) | — | Chen/Roytburg (pairwise), IFEval + HealthBench (rubric) |
 | **S2 Match on correctness** | Compare J's answer only with answers of the *same* oracle label on the same item (Roytburg proxy; rubric `matched_fail`) | p, β | `measures/roytburg.py`, `measures/rubric.py` |
-| **S3 Match on strength** | Proxy/comparison generators chosen with pair win rate close to J's (|logit p_K − logit p_J| small) | γ (pair lean) | not yet (filter on unit p from `real/pair_check.units`) |
+| **S3 Match on strength** | Comparison generators/proxies of similar strength: rubric |pass-rate diff| ≤ .04; pairwise |logit win-rate diff| ≤ 0.1 | p − q gap, halo h, pair lean γ | ✅ validated on real placebos: `real/rubric_control.py`, `real/pair_control.py` (§6) |
 | **S4 Third-party difference** | Same comparison graded by ≥ 3 judges outside J's family and the comparison generators' families; DiD = J's gap − their gap | halo h, consensus errors ρ, shared errors | `real/rubric_did.py` (rubric); pairwise version not yet |
 | **S5 Sensitivity weighting** | Weight third-party judges by similarity of sensitivity to J (accuracy, slope of verdict on quality); drop judges at chance | spurious DiD from insensitive judges (Aya, Command-R) | not yet |
 | **S6 Filter** | Drop non-verdict outputs (verdict_mass < 0.5), same-family pairs; flag oracle–consensus conflicts (ρ items) and report with/without | oracle noise | partly (`MIN_MASS`, family filters) |
@@ -54,3 +54,33 @@ Every confound below is measured on real data, not assumed.
 - Start with pairwise (Roytburg data, all confounds measured) or rubric (cleaner labels, our own runs)?
 - S4 needs third-party verdicts on the *same* comparisons: pairwise needs new GPU judging (J judging K vs R for many K); rubric already has it.
 - Whether consensus-error items (ρ) count as judge errors or oracle errors (MMLU's 31% suggests some oracle/label noise).
+
+## 6. Results so far: real placebo tests (2026-11-17)
+
+Placebo = assign "own" to a model that is NOT the judge (true self-preference 0). A measure passes if
+its placebo values centre on 0 and do not track the "own" model's strength. Plain-language version:
+`docs/CONFOUND_CONTROL_EXPLAINED.md`.
+
+**Rubric, IFEval** (`real/rubric_placebo.py`, `real/rubric_control.py`), slope on quality gap (want 0):
+
+| Measure / control | All comparison generators | Strength-matched (±.04) | + two-judge difference |
+|---|---|---|---|
+| matched_fail | .63 ❌ | **−.007 ✅** | — |
+| two-judge difference | −.004 ✅ (all) | −.05 ✅ | power .97 sd (vs .86) |
+| score_gap | .76 ❌ | .09 🟡 | |
+| hspp_rub (Pombal) | 1.03 ❌ | .28 ❌ | |
+| hspp_rub_ratio (Pombal) | 6.0 ❌ | 1.2 ❌ | |
+
+Cost of strength matching: ~2.6 effective comparison generators; 20/152 placebo pairs have no peer within ±.04.
+
+**Pairwise, Roytburg null pairs** (`real/pair_control.py`): Roytburg's matched-proxy value per (judge, proxy)
+
+| Comparison proxies | Mean logit strength gap | Corr with gap | Slope (per logit) | Items kept |
+|---|---|---|---|---|
+| all (Roytburg) | .26 | **.54 ❌** | .12 | 29,112 |
+| within ±0.5 logit | .07 | .39 | .26 | 25,772 |
+| within ±0.25 logit | .03 | .28 | .44 | 20,944 |
+| within ±0.1 logit | .02 | **−.08 ✅** | −.04 | 13,365 |
+
+Roytburg's pooled null was 0 by construction (leave-one-out symmetry); per proxy, it leaks the pair
+lean (slope .12 per logit ≈ γ 0.48 × σ' 0.2). Matching proxies within 0.1 logit removes it, at 54% of items.
