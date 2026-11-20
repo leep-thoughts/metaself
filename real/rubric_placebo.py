@@ -14,11 +14,11 @@ import os
 import numpy as np
 import pandas as pd
 
-from infer.ifeval_rubric import family
+from infer.ifeval_rubric import DATASET, family
 from measures.rubric import MEASURES, estimate
 from real.rubric_real import units
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rubric_placebo_results.csv")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rubric_placebo_results" + ("" if DATASET == "ifeval" else f"_{DATASET}") + ".csv")
 
 
 def main():
@@ -101,4 +101,5 @@ def did_placebo():
 
 if __name__ == "__main__":
     main()
-    did_placebo()
+    if DATASET == "ifeval":   # labels shared by both judges needed; HealthBench labels depend on the judge
+        did_placebo()

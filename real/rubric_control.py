@@ -26,12 +26,12 @@ import os
 import numpy as np
 import pandas as pd
 
-from infer.ifeval_rubric import family
+from infer.ifeval_rubric import DATASET, family
 from measures.rubric import MEASURES
 from real.rubric_real import units
 
 DELTA, BAND = 0.04, 0.03
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rubric_control_results.csv")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rubric_control_results" + ("" if DATASET == "ifeval" else f"_{DATASET}") + ".csv")
 
 
 def wmean(x, w):
@@ -61,7 +61,7 @@ def estimate_w(d):
 def main():
     df = units()
     df["gfam"] = df.generator.map(family)
-    rate = df.drop_duplicates(["generator", "item"]).groupby("generator").y.mean()
+    rate = df.groupby("generator").y.mean()   # pass rate (HealthBench: averaged over judge-specific labels)
     rows = []
     for K, dk in df.groupby("judge"):
         fk = family(K)
