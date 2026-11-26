@@ -80,10 +80,11 @@ def _chat(llm, convs, max_tokens, min_out, chat_kw=None, **sampling):
 
 
 def _label_probs(top: dict, choices: list[str]) -> dict:
-    """Sum the probability of every token in the top-K whose text is a label (after stripping)."""
+    """Sum the probability of every token in the top-K whose text is a label (after stripping
+    whitespace and surrounding quotes: some judges open with '"A' or '“T' as a single token)."""
     p = {c: 0.0 for c in choices}
     for lp in top.values():
-        tok = (lp.decoded_token or "").replace("▁", " ").strip()
+        tok = (lp.decoded_token or "").replace("▁", " ").strip().strip("\"'“”‘’`").strip()
         if tok in p:
             p[tok] += math.exp(lp.logprob)
     return p
