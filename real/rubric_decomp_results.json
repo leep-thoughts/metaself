@@ -1,0 +1,22 @@
+{
+ "dataset": "ifeval",
+ "pairs": 152,
+ "slope_within_judge": {
+  "hspp_rubric": 1.0303395714176509,
+  "criteria_part": 0.3406154656706586,
+  "generator_part": 0.6788219585584481,
+  "length_part": 0.010903084622116026,
+  "rest": -9.374335719285185e-07
+ },
+ "slope_pooled": {
+  "hspp_rubric": 1.0339086792063081,
+  "criteria_part": 0.3422287419099019,
+  "generator_part": 0.6806562358107973,
+  "length_part": 0.011024644913181803,
+  "rest": -9.434275725938062e-07
+ },
+ "length_coef_median": -0.002605402954703904,
+ "going_easy_corr_with_other_judges": 0.6841835380052259,
+ "going_easy_corr_with_pass_rate": 0.6383208225830013,
+ "going_easy_corr_with_answer_length": -0.16296699605649403
+}

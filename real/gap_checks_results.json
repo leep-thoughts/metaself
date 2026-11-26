@@ -1,0 +1,60 @@
+{
+ "length": {
+  "all": {
+   "rows": 40661,
+   "units": 1015,
+   "gamma": 0.4771766711675654,
+   "gamma_holding_length": 0.2962376324579985,
+   "lean_per_log_length_ratio": 2.1736041293303603,
+   "mean_abs_log_length_ratio": 0.8591305420708252
+  },
+  "similar length": {
+   "rows": 8323,
+   "units": 496,
+   "gamma": 0.5087091961897044,
+   "gamma_holding_length": 0.6260277847034009,
+   "lean_per_log_length_ratio": 2.15453567784263,
+   "mean_abs_log_length_ratio": 0.09823666120349446
+  }
+ },
+ "own_vs_null": {
+  "D_A (own right)": {
+   "own_minus_null": 0.11908042304757954,
+   "lo": 0.030670192440813066,
+   "hi": 0.31788707975426844
+  },
+  "D_B (own wrong)": {
+   "own_minus_null": 0.17597415882186465,
+   "lo": -0.04404057070344852,
+   "hi": 0.5734999621123041
+  },
+  "rows": 5897,
+  "judge_tasks": 23
+ },
+ "difficulty": {
+  "none": {
+   "acc_DA": 0.6854,
+   "acc_DB": 0.5336,
+   "equal_opportunity": 0.0877,
+   "hspp": 0.4664
+  },
+  "pairs": {
+   "acc_DA": 0.6745,
+   "acc_DB": 0.4506,
+   "equal_opportunity": 0.2019,
+   "hspp": 0.5494
+  },
+  "+ problem": {
+   "acc_DA": 0.5696,
+   "acc_DB": 0.4862,
+   "equal_opportunity": 0.0665,
+   "hspp": 0.5138
+  },
+  "+ solve": {
+   "acc_DA": 0.6441,
+   "acc_DB": 0.4772,
+   "equal_opportunity": 0.0971,
+   "hspp": 0.5228
+  }
+ }
+}

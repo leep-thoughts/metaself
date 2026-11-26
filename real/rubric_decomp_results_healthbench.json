@@ -1,0 +1,22 @@
+{
+ "dataset": "healthbench",
+ "pairs": 152,
+ "slope_within_judge": {
+  "hspp_rubric": 0.5863462178578156,
+  "criteria_part": -0.09346135129010169,
+  "generator_part": 0.49758512633422414,
+  "length_part": 0.1822224428257543,
+  "rest": -1.2061280561868634e-11
+ },
+ "slope_pooled": {
+  "hspp_rubric": 0.5866630062415251,
+  "criteria_part": -0.09322091165513141,
+  "generator_part": 0.4978668582438178,
+  "length_part": 0.18201705966500098,
+  "rest": -1.2162225602394153e-11
+ },
+ "length_coef_median": 0.0397795891569494,
+ "going_easy_corr_with_other_judges": 0.7678932316233583,
+ "going_easy_corr_with_pass_rate": 0.7935893806661538,
+ "going_easy_corr_with_answer_length": 0.6619366700309623
+}

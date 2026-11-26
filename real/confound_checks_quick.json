@@ -1,0 +1,53 @@
+{
+ "split_half": {
+  "lean": 0.802617230238577,
+  "left_by_rule": 0.7756478604582198,
+  "units": 690.5
+ },
+ "mechanical": {
+  "mech_panickssery_a": 0.812,
+  "real_panickssery_a": 0.992,
+  "mech_equal_opportunity_a": 0.0,
+  "real_equal_opportunity_a": 1.265,
+  "mech_hspp_a": -1.0,
+  "real_hspp_a": 0.001,
+  "mech_roytburg_a": 0.0,
+  "real_roytburg_a": -0.007
+ },
+ "roytburg_acc": {
+  "confidence": {
+   "slope_acc_pooled": -0.6175994765413558,
+   "ci": [
+    -0.8782393140660137,
+    -0.27851293052614673
+   ],
+   "slope_acc_median": -0.5856518282322762,
+   "slope_winrate_logit": 0.01927343116213806,
+   "acc_range": 0.1677520406004353,
+   "n_judge_target": 31
+  },
+  "problem_acc": {
+   "slope_acc_pooled": -0.024495737212498682,
+   "ci": [
+    -0.23289948959152293,
+    0.2146305132179161
+   ],
+   "slope_acc_median": 0.13209253604990195,
+   "slope_winrate_logit": 0.01904612214013065,
+   "acc_range": 0.21077123280223053,
+   "n_judge_target": 38
+  }
+ },
+ "oracle_L": {
+  "units": 283,
+  "rows_matched": 27909,
+  "L_votes_mean": 0.34788816942983397,
+  "L_oracle_mean": 0.8405047705938641,
+  "corr_L": 0.7581246555349579,
+  "b_right_mean": -0.2256037538971354,
+  "b_wrong_mean": 0.7596294484309248,
+  "corr_b_right_b_wrong_within": 0.4002340138822738,
+  "gamma_right": 0.5265817210871901,
+  "gamma_wrong": 0.48585921084159456
+ }
+}
